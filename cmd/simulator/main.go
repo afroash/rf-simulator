@@ -19,12 +19,18 @@ func main() {
 
 	// Add different types of bursts
 	bursts := []*tdma.Burst{
-		tdma.NewBurst(make([]byte, 1024), 0, tdma.DataBurst, modulation.QAM64),      // Full data burst
-		tdma.NewBurst(make([]byte, 512), 1, tdma.DataBurst, modulation.QPSK),        // Half data burst
-		tdma.NewBurst(make([]byte, 256), 2, tdma.ControlBurst, modulation.BPSK),     // Control burst
-		tdma.NewBurst(make([]byte, 128), 3, tdma.MaintenanceBurst, modulation.QPSK), // Maintenance burst
+		tdma.NewBurst(make([]byte, 1024), 0, tdma.DataBurst, modulation.BPSK),  // Basic modulation
+		tdma.NewBurst(make([]byte, 1024), 1, tdma.DataBurst, modulation.QPSK),  // Double efficiency
+		tdma.NewBurst(make([]byte, 1024), 2, tdma.DataBurst, modulation.QAM16), // Quadruple efficiency
+		tdma.NewBurst(make([]byte, 1024), 3, tdma.DataBurst, modulation.QAM64), // 6x efficiency
 	}
 	for _, burst := range bursts {
+		log.Printf("Debug - Carrier %d: %s, DataRate: %.2f Mbps, Utilization: %.2f%%",
+			burst.CarrierID,
+			burst.Modulation.Name,
+			burst.Datarate/1000000,
+			burst.Utilisation,
+		)
 		err := frame.AddBurst(burst.CarrierID, burst)
 		if err != nil {
 			log.Printf("Error adding burst to carrier %d: %v", burst.CarrierID, err)

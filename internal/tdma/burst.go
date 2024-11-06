@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/afroash/rf-simulator/internal/modulation"
-	"github.com/afroash/rf-simulator/internal/utils"
 )
 
 type BurstType int
@@ -18,15 +17,17 @@ const (
 )
 
 type Burst struct {
-	Data        []byte
-	StartTime   time.Duration
-	Duration    time.Duration
-	CarrierID   int
-	Type        BurstType
-	Utilisation float64 // Percentage of the time slot used by the burst
-	Modulation  modulation.ModulationScheme
-	SNR         float64
-	BER         float64
+	Data          []byte
+	StartTime     time.Duration
+	Duration      time.Duration
+	CarrierID     int
+	Type          BurstType
+	Utilisation   float64 // Percentage of the time slot used by the burst
+	Modulation    modulation.ModulationScheme
+	SNR           float64
+	BER           float64
+	Datarate      float64
+	SymbolsPacked int
 }
 
 type TimeSlot struct {
@@ -40,13 +41,20 @@ type TimeSlot struct {
 func NewBurst(data []byte, carrierID int, burstType BurstType, mod modulation.ModulationType) *Burst {
 	modScheme := modulation.GetModulationScheme(mod)
 
+	//Default  duration for calculation purposes.
+	defaultDuration := 450 * time.Millisecond
+
+	utilisation, dataRate, symbolsPacked := calculateModulationBasedUtilization(len(data), *modScheme, defaultDuration)
+
 	burst := &Burst{
-		Data:        data,
-		CarrierID:   carrierID,
-		Type:        burstType,
-		Utilisation: utils.CalculateUtilisation(len(data)),
-		Modulation:  *modScheme,
-		SNR:         10.0, // Default SNR value
+		Data:          data,
+		CarrierID:     carrierID,
+		Type:          burstType,
+		Utilisation:   utilisation,
+		Modulation:    *modScheme,
+		SNR:           20.0, // Default SNR value
+		Datarate:      dataRate,
+		SymbolsPacked: symbolsPacked,
 	}
 	burst.BER = modScheme.CalculateBER(burst.SNR)
 	return burst
@@ -91,4 +99,33 @@ func GetBurstsType(burstType BurstType) string {
 	default:
 		return "?" // Unknown burst type
 	}
+}
+
+// calculateModulationBasedUtilization calculates how much of the slot is utilized
+// taking into account the modulation scheme's efficiency
+func calculateModulationBasedUtilization(dataSize int, mod modulation.ModulationScheme, duration time.Duration) (float64, float64, int) {
+	// Convert duration to seconds
+	durationSec := duration.Seconds()
+
+	// Calculate symbol rate (assuming 1 Hz per symbol as base rate)
+	baseSymbolRate := 1000000.0 // 1 MHz base symbol rate
+	maxSymbols := int(baseSymbolRate * durationSec)
+
+	// Calculate how many bits we can send with this modulation
+	bitsPerSymbol := mod.BitsPerSymbol
+	maxBits := int(float64(maxSymbols) * bitsPerSymbol)
+
+	// Calculate actual bits we're trying to send
+	actualBits := dataSize * 8
+
+	// Calculate utilization percentage
+	utilization := (float64(actualBits) / float64(maxBits)) * 100
+	if utilization > 100 {
+		utilization = 100
+	}
+
+	// Calculate effective data rate
+	dataRate := float64(actualBits) / durationSec // bits per second
+
+	return utilization, dataRate, maxSymbols
 }
