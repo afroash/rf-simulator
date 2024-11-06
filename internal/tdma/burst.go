@@ -16,6 +16,12 @@ const (
 	MaintenanceBurst
 )
 
+// Constants for calculations
+const (
+	// Typical symbol rate for satellite communications (30 MHz bandwidth)
+	BaseSymbolRate = 25e6 // 25 MSymbols/second
+)
+
 type Burst struct {
 	Data          []byte
 	StartTime     time.Duration
@@ -38,25 +44,29 @@ type TimeSlot struct {
 }
 
 // NewBurst creates a new burst with the specified data.
+// NewBurst creates a new burst with modulation parameters
 func NewBurst(data []byte, carrierID int, burstType BurstType, mod modulation.ModulationType) *Burst {
 	modScheme := modulation.GetModulationScheme(mod)
 
-	//Default  duration for calculation purposes.
-	defaultDuration := 450 * time.Millisecond
+	// Default duration for calculation purposes
+	defaultDuration := 450 * time.Microsecond
 
-	utilisation, dataRate, symbolsPacked := calculateModulationBasedUtilization(len(data), *modScheme, defaultDuration)
+	// Calculate effective values
+	utilisation, datarate, symbolsPacked := calculateModulationBasedUtilization(len(data), *modScheme, defaultDuration)
 
 	burst := &Burst{
 		Data:          data,
 		CarrierID:     carrierID,
 		Type:          burstType,
-		Utilisation:   utilisation,
 		Modulation:    *modScheme,
-		SNR:           20.0, // Default SNR value
-		Datarate:      dataRate,
+		SNR:           20.0,
+		Utilisation:   utilisation,
+		Datarate:      datarate,
 		SymbolsPacked: symbolsPacked,
 	}
+
 	burst.BER = modScheme.CalculateBER(burst.SNR)
+
 	return burst
 }
 
@@ -107,25 +117,23 @@ func calculateModulationBasedUtilization(dataSize int, mod modulation.Modulation
 	// Convert duration to seconds
 	durationSec := duration.Seconds()
 
-	// Calculate symbol rate (assuming 1 Hz per symbol as base rate)
-	baseSymbolRate := 1000000.0 // 1 MHz base symbol rate
-	maxSymbols := int(baseSymbolRate * durationSec)
+	// Calculate maximum symbols in this time slot
+	symbolsInSlot := int(BaseSymbolRate * durationSec)
 
-	// Calculate how many bits we can send with this modulation
-	bitsPerSymbol := mod.BitsPerSymbol
-	maxBits := int(float64(maxSymbols) * bitsPerSymbol)
+	// Calculate maximum bits that could be transmitted with this modulation
+	maxBitsInSlot := int(float64(symbolsInSlot) * mod.BitsPerSymbol)
 
 	// Calculate actual bits we're trying to send
 	actualBits := dataSize * 8
 
-	// Calculate utilization percentage
-	utilization := (float64(actualBits) / float64(maxBits)) * 100
+	// Calculate data rate based on modulation
+	dataRate := float64(actualBits) / durationSec // bits per second
+
+	// Calculate utilization as percentage of maximum capacity
+	utilization := (float64(actualBits) / float64(maxBitsInSlot)) * 100
 	if utilization > 100 {
 		utilization = 100
 	}
 
-	// Calculate effective data rate
-	dataRate := float64(actualBits) / durationSec // bits per second
-
-	return utilization, dataRate, maxSymbols
+	return utilization, dataRate, symbolsInSlot
 }
