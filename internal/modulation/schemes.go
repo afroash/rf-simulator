@@ -101,3 +101,39 @@ func (ms *ModulationScheme) CalculateBER(snrDb float64) float64 {
 		return 0
 	}
 }
+
+// GetOptimalModulation returns the optimal modulation scheme for the given SNR.
+func GetOptimalModulation(snr float64) ModulationType {
+	//SNR Thresholds for different modulation schemes
+	// These are currently simplified values but are representive.
+	switch {
+	case snr >= 19.5:
+		return QAM64 // Highest speed, requires excellent SNR.
+	case snr >= 15.1:
+		return QAM16 // High speed, requires good SNR.
+	case snr >= 14.0:
+		return PSK8 // Reliable with a moderate speed.
+	case snr >= 11.5:
+		return QPSK // Good balance of robustness and speed.
+	default:
+		return BPSK // Most robust, lowest data rate.
+	}
+}
+
+// CalculateEffectiveDataRate calculates the effective data rate for a modulation scheme given the SNR.
+func (ms ModulationScheme) CalculateEffectiveDataRate(snr float64, symbolRate float64) float64 {
+	// BAsic data rate (bits per second)
+	baseDataRate := symbolRate * ms.BitsPerSymbol
+
+	// Calculate SNR margin
+	snrMargin := snr - ms.ReqSNR
+
+	//Efficiency factor based on SNR Margin
+	efficiency := 1.0
+	if snrMargin > 0 {
+		efficiency = math.Max(0.0, 1.0+(snrMargin/20.0))
+	}
+
+	return baseDataRate * efficiency
+
+}

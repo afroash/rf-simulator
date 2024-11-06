@@ -1,50 +1,54 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
-	"github.com/afroash/rf-simulator/internal/modulation"
 	"github.com/afroash/rf-simulator/internal/tdma"
 )
 
 func main() {
 	log.Println("Starting simulator...")
+	log.Println("SNR to Data Rate Relationship Demo...")
 
-	// Create a new TDMA frame (2ms frame duration, 50µs guard time, 4 carriers)
 	frame, err := tdma.NewTDMAFrame(2*time.Millisecond, 50*time.Microsecond, 4)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Calculate data sizes based on modulation efficiency
-	// For 450µs timeslot with 25 MSps:
-	// Base data size for BPSK (will be multiplied by modulation efficiency)
-	baseDataSize := 1400 // bytes
-
-	bursts := []*tdma.Burst{
-		// BPSK: 1 bit per symbol
-		tdma.NewBurst(make([]byte, baseDataSize*1), 0, tdma.DataBurst, modulation.BPSK),
-
-		// QPSK: 2 bits per symbol
-		tdma.NewBurst(make([]byte, baseDataSize*2), 1, tdma.DataBurst, modulation.QPSK),
-
-		// 16-QAM: 4 bits per symbol
-		tdma.NewBurst(make([]byte, baseDataSize*4), 2, tdma.DataBurst, modulation.QAM16),
-
-		// 64-QAM: 6 bits per symbol
-		tdma.NewBurst(make([]byte, baseDataSize*6), 3, tdma.DataBurst, modulation.QAM64),
+	// Test cases showing SNR → Modulation → Data Rate relationship
+	testCases := []struct {
+		snr      float64
+		dataSize int
+		expected string
+	}{
+		{21.0, 1400, "Excellent - Expect 64-QAM"},
+		{16.0, 1400, "Good - Expect 16-QAM"},
+		{13.0, 1400, "Moderate - Expect QPSK"},
+		{8.0, 1400, "Poor - Expect BPSK"},
 	}
 
-	// Add debug information
-	for _, burst := range bursts {
-		log.Printf("Debug - Carrier %d: %s, DataRate: %.2f Mbps, Utilization: %.2f%%, Data Size: %d bytes",
-			burst.CarrierID,
-			burst.Modulation.Name,
-			burst.Datarate/1e6, // Convert to Mbps
-			burst.Utilisation,
-			len(burst.Data),
+	fmt.Println("\nSNR to Modulation to Data Rate Relationship:")
+	fmt.Println("════════════════════════════════════════════")
+
+	for i, tc := range testCases {
+		burst := tdma.NewBurstWithSNR(
+			make([]byte, tc.dataSize),
+			i,
+			tdma.DataBurst,
+			tc.snr,
 		)
+
+		fmt.Printf("\nCarrier %d:\n", i)
+		fmt.Printf("  SNR: %.1f dB (%s)\n", tc.snr, tc.expected)
+		fmt.Printf("  → Selected Modulation: %s (%g bits/symbol)\n",
+			burst.Modulation.Name,
+			burst.Modulation.BitsPerSymbol)
+		fmt.Printf("  → Achieved Data Rate: %.2f Mbps\n",
+			burst.Datarate/1e6)
+		fmt.Printf("  → Bit Error Rate: %.2e\n",
+			burst.BER)
 
 		err := frame.AddBurst(burst.CarrierID, burst)
 		if err != nil {
@@ -52,5 +56,7 @@ func main() {
 		}
 	}
 
+	fmt.Println("\nFull TDMA Frame Structure:")
+	fmt.Println("════════════════════════════════════════════")
 	frame.PrintDetailedFrameStructure()
 }

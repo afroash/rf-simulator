@@ -43,29 +43,33 @@ type TimeSlot struct {
 	IsGuardTime bool
 }
 
-// NewBurst creates a new burst with the specified data.
-// NewBurst creates a new burst with modulation parameters
-func NewBurst(data []byte, carrierID int, burstType BurstType, mod modulation.ModulationType) *Burst {
-	modScheme := modulation.GetModulationScheme(mod)
+// NewBurstWithSNR creates a burst with specific SNR value
+func NewBurstWithSNR(data []byte, carrierID int, burstType BurstType, snr float64) *Burst {
+	// Automatically select optimal modulation for given SNR
+	optimalMod := modulation.GetOptimalModulation(snr)
+	modScheme := modulation.GetModulationScheme(optimalMod)
 
-	// Default duration for calculation purposes
 	defaultDuration := 450 * time.Microsecond
 
-	// Calculate effective values
-	utilisation, datarate, symbolsPacked := calculateModulationBasedUtilization(len(data), *modScheme, defaultDuration)
+	utilization, dataRate, symbolsPacked := calculateModulationBasedUtilization(
+		len(data),
+		*modScheme,
+		defaultDuration,
+		snr,
+	)
 
 	burst := &Burst{
 		Data:          data,
 		CarrierID:     carrierID,
 		Type:          burstType,
 		Modulation:    *modScheme,
-		SNR:           20.0,
-		Utilisation:   utilisation,
-		Datarate:      datarate,
+		SNR:           snr,
+		Utilisation:   utilization,
+		Datarate:      dataRate,
 		SymbolsPacked: symbolsPacked,
 	}
 
-	burst.BER = modScheme.CalculateBER(burst.SNR)
+	burst.BER = modScheme.CalculateBER(snr)
 
 	return burst
 }
@@ -112,22 +116,18 @@ func GetBurstsType(burstType BurstType) string {
 }
 
 // calculateModulationBasedUtilization calculates how much of the slot is utilized
-// taking into account the modulation scheme's efficiency
-func calculateModulationBasedUtilization(dataSize int, mod modulation.ModulationScheme, duration time.Duration) (float64, float64, int) {
-	// Convert duration to seconds
+// taking into account the modulation scheme's efficiency and the SNR.
+func calculateModulationBasedUtilization(dataSize int, mod modulation.ModulationScheme, duration time.Duration, snr float64) (float64, float64, int) {
 	durationSec := duration.Seconds()
 
-	// Calculate maximum symbols in this time slot
-	symbolsInSlot := int(BaseSymbolRate * durationSec)
+	// Calculate effective data rate considering SNR
+	effectiveDataRate := mod.CalculateEffectiveDataRate(BaseSymbolRate, snr)
 
-	// Calculate maximum bits that could be transmitted with this modulation
-	maxBitsInSlot := int(float64(symbolsInSlot) * mod.BitsPerSymbol)
+	// Maximum bits that could be transmitted in this time slot
+	maxBitsInSlot := int(effectiveDataRate * durationSec)
 
-	// Calculate actual bits we're trying to send
+	// Actual bits we're trying to send
 	actualBits := dataSize * 8
-
-	// Calculate data rate based on modulation
-	dataRate := float64(actualBits) / durationSec // bits per second
 
 	// Calculate utilization as percentage of maximum capacity
 	utilization := (float64(actualBits) / float64(maxBitsInSlot)) * 100
@@ -135,5 +135,13 @@ func calculateModulationBasedUtilization(dataSize int, mod modulation.Modulation
 		utilization = 100
 	}
 
-	return utilization, dataRate, symbolsInSlot
+	// Actual achieved data rate
+	achievedDataRate := float64(actualBits) / durationSec
+	if achievedDataRate > effectiveDataRate {
+		achievedDataRate = effectiveDataRate
+	}
+
+	symbolsPacked := int(BaseSymbolRate * durationSec)
+
+	return utilization, achievedDataRate, symbolsPacked
 }
