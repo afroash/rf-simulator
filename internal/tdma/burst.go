@@ -8,14 +8,6 @@ import (
 	"github.com/afroash/rf-simulator/internal/modulation"
 )
 
-type BurstType int
-
-const (
-	DataBurst BurstType = iota
-	ControlBurst
-	MaintenanceBurst
-)
-
 // Constants for calculations
 const (
 	// Typical symbol rate for satellite communications (30 MHz bandwidth)

@@ -9,54 +9,73 @@ import (
 )
 
 func main() {
-	log.Println("Starting simulator...")
-	log.Println("SNR to Data Rate Relationship Demo...")
+	log.Println("Starting Dynamic TDMA Simulation...")
 
-	frame, err := tdma.NewTDMAFrame(2*time.Millisecond, 50*time.Microsecond, 4)
+	// Create frame configuration with variable slot durations
+	config := tdma.FrameConfig{
+		FrameDuration: 2 * time.Millisecond,
+		GuardTime:     50 * time.Microsecond,
+		NumCarriers:   4,
+		SlotDurations: []time.Duration{
+			600 * time.Microsecond, // More time for high-priority carrier
+			400 * time.Microsecond,
+			300 * time.Microsecond,
+			200 * time.Microsecond,
+		},
+	}
+
+	frame, err := tdma.NewFrame(config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Test cases showing SNR → Modulation → Data Rate relationship
-	testCases := []struct {
-		snr      float64
-		dataSize int
-		expected string
-	}{
-		{21.0, 1400, "Excellent - Expect 64-QAM"},
-		{16.0, 1400, "Good - Expect 16-QAM"},
-		{13.0, 1400, "Moderate - Expect QPSK"},
-		{8.0, 1400, "Poor - Expect BPSK"},
-	}
+	// Simulate multiple frames
+	numFramesToSimulate := 5
+	fmt.Printf("\nSimulating %d frames with dynamic SNR...\n", numFramesToSimulate)
 
-	fmt.Println("\nSNR to Modulation to Data Rate Relationship:")
-	fmt.Println("════════════════════════════════════════════")
+	for frameNum := 0; frameNum < numFramesToSimulate; frameNum++ {
+		fmt.Printf("\nFrame %d:\n", frameNum)
+		fmt.Printf("════════════════════════════════════════════\n")
 
-	for i, tc := range testCases {
-		burst := tdma.NewBurstWithSNR(
-			make([]byte, tc.dataSize),
-			i,
-			tdma.DataBurst,
-			tc.snr,
-		)
+		// Get updated SNR values for this frame
+		snrValues := frame.UpdateSNR()
 
-		fmt.Printf("\nCarrier %d:\n", i)
-		fmt.Printf("  SNR: %.1f dB (%s)\n", tc.snr, tc.expected)
-		fmt.Printf("  → Selected Modulation: %s (%g bits/symbol)\n",
-			burst.Modulation.Name,
-			burst.Modulation.BitsPerSymbol)
-		fmt.Printf("  → Achieved Data Rate: %.2f Mbps\n",
-			burst.Datarate/1e6)
-		fmt.Printf("  → Bit Error Rate: %.2e\n",
-			burst.BER)
+		// Create bursts with current SNR values
+		for carrierID := 0; carrierID < config.NumCarriers; carrierID++ {
+			// Calculate data size based on slot duration
+			slotDuration := config.SlotDurations[carrierID]
+			baseDataSize := int(slotDuration.Microseconds() * 2400 / 450) // Scale data size with duration
 
-		err := frame.AddBurst(burst.CarrierID, burst)
-		if err != nil {
-			log.Printf("Error adding burst to carrier %d: %v", burst.CarrierID, err)
+			// Get current SNR for this carrier
+			snr := snrValues[carrierID]
+			if snr == 0 { // If no update this frame, skip
+				snr = frame.SNRProfiles[carrierID].BaselineSNR
+			}
+
+			burst := tdma.NewBurstWithSNR(
+				make([]byte, baseDataSize),
+				carrierID,
+				tdma.DataBurst,
+				snr,
+			)
+
+			fmt.Printf("\nCarrier %d:\n", carrierID)
+			fmt.Printf("  Slot Duration: %v\n", slotDuration)
+			fmt.Printf("  SNR: %.1f dB\n", snr)
+			fmt.Printf("  → Modulation: %s\n", burst.Modulation.Name)
+			fmt.Printf("  → Data Rate: %.2f Mbps\n", burst.Datarate/1e6)
+			fmt.Printf("  → Efficiency: %.1f%%\n", burst.Utilisation)
+
+			err := frame.AddBurst(burst.CarrierID, burst)
+			if err != nil {
+				log.Printf("Error adding burst to carrier %d: %v", carrierID, err)
+			}
 		}
-	}
 
-	fmt.Println("\nFull TDMA Frame Structure:")
-	fmt.Println("════════════════════════════════════════════")
-	frame.PrintDetailedFrameStructure()
+		frame.PrintDetailedFrameStructure()
+		frame.AdvanceFrame()
+
+		// Small delay to make output readable
+		time.Sleep(time.Second)
+	}
 }

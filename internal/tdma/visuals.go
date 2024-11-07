@@ -1,13 +1,18 @@
+// internal/tdma/visualization.go
 package tdma
 
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
-// PrintDetailedFrameStructure prints an enhanced visual representation of the frame
-func (frame *TDMAFrame) PrintDetailedFrameStructure() {
-	fmt.Printf("\nTDMA Frame Structure (Duration: %v)\n", frame.Duration)
+// PrintDetailedFrameStructure prints a detailed view of the frame
+func (f *Frame) PrintDetailedFrameStructure() {
+	fmt.Printf("\nTDMA Frame Structure (Frame #%d, Duration: %v)\n",
+		f.FrameNumber,
+		f.Config.FrameDuration,
+	)
 	fmt.Println("═══════════════════════════════════════════════════════════════════════════")
 
 	fmt.Println("Time →")
@@ -19,40 +24,33 @@ func (frame *TDMAFrame) PrintDetailedFrameStructure() {
 	)
 	fmt.Println("───────────────────────────────────────────────────────────────────────────")
 
-	for i, slot := range frame.TimeSlots {
+	slotNum := 0
+	for _, slot := range f.TimeSlots {
 		if slot.IsGuardTime {
 			printGuardTimeVisual()
 		} else {
-			printSlotVisual(i/2, slot)
+			printSlotVisual(slotNum, slot)
+			slotNum++
 		}
 	}
 
 	fmt.Println("═══════════════════════════════════════════════════════════════════════════")
 	printLegend()
-	printModulationEfficiency()
-}
-
-func printModulationEfficiency() {
-	fmt.Println("\nModulation Efficiency:")
-	fmt.Println("BPSK:  1 bit/symbol  - Most robust, lowest data rate")
-	fmt.Println("QPSK:  2 bits/symbol - Good balance of robustness and speed")
-	fmt.Println("8PSK:  3 bits/symbol - Higher speed, needs better SNR")
-	fmt.Println("16QAM: 4 bits/symbol - High speed, requires good SNR")
-	fmt.Println("64QAM: 6 bits/symbol - Highest speed, requires excellent SNR")
 }
 
 func printSlotVisual(slotNum int, slot *TimeSlot) {
-	var burstInfo, utilizationBar, modInfo, dataRateInfo string
+	var burstInfo, utilizationBar string
 
 	if slot.Burst != nil {
-		burstType := GetBurstsType(slot.Burst.Type)
-		modInfo = slot.Burst.Modulation.Name
-		dataRateInfo = fmt.Sprintf("%.2f Mbps", slot.Burst.Datarate/1000000)
+		burstType := getBurstTypeSymbol(slot.Burst.Type)
+		dataRateInfo := fmt.Sprintf("%.2f Mbps", slot.Burst.Datarate/1e6)
+		snrInfo := fmt.Sprintf("SNR: %.1fdB", slot.Burst.SNR)
 
-		burstInfo = fmt.Sprintf("Carrier %d [%s] %s (%s)",
+		burstInfo = fmt.Sprintf("Carrier %d [%s] %s %s (%s)",
 			slot.Burst.CarrierID,
 			burstType,
-			modInfo,
+			slot.Burst.Modulation.Name,
+			snrInfo,
 			dataRateInfo,
 		)
 		utilizationBar = createUtilizationBar(slot.Burst.Utilisation)
@@ -70,7 +68,7 @@ func printSlotVisual(slotNum int, slot *TimeSlot) {
 }
 
 func printGuardTimeVisual() {
-	fmt.Printf("%s\n", strings.Repeat("-", 50))
+	fmt.Printf("%s\n", strings.Repeat("-", 80))
 }
 
 func createUtilizationBar(utilization float64) string {
@@ -86,6 +84,19 @@ func createUtilizationBar(utilization float64) string {
 	return fmt.Sprintf("%s %.1f%%", bar.String(), utilization)
 }
 
+func getBurstTypeSymbol(burstType BurstType) string {
+	switch burstType {
+	case DataBurst:
+		return "D"
+	case ControlBurst:
+		return "C"
+	case MaintenanceBurst:
+		return "M"
+	default:
+		return "?"
+	}
+}
+
 func printLegend() {
 	fmt.Println("\nLegend:")
 	fmt.Println("D - Data Burst")
@@ -93,4 +104,5 @@ func printLegend() {
 	fmt.Println("M - Maintenance Burst")
 	fmt.Println("█ - Utilized capacity")
 	fmt.Println("░ - Available capacity")
+	fmt.Printf("Guard Time: %v between slots\n", time.Duration(50*time.Microsecond))
 }
