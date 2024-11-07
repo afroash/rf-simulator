@@ -106,3 +106,86 @@ func printLegend() {
 	fmt.Println("░ - Available capacity")
 	fmt.Printf("Guard Time: %v between slots\n", time.Duration(50*time.Microsecond))
 }
+
+func createProgressBar(percent float64, width int) string {
+	// Ensure percent is between 0 and 100
+	if percent < 0 {
+		percent = 0
+	}
+	if percent > 100 {
+		percent = 100
+	}
+
+	filled := int(percent * float64(width) / 100)
+	// Ensure filled is between 0 and width
+	if filled < 0 {
+		filled = 0
+	}
+	if filled > width {
+		filled = width
+	}
+
+	bar := strings.Repeat("█", filled) + strings.Repeat("░", width-filled)
+	return fmt.Sprintf("[%s] %5.1f%%", bar, percent)
+}
+
+func PrintFrameSummary(frameNum int, statuses []TerminalStatus, frameDuration time.Duration) {
+	// Clear screen (ANSI escape sequence)
+	fmt.Print("\033[H\033[2J")
+
+	width := 64 // Total width of the box
+
+	// Print frame header
+	fmt.Printf("╔%s╗\n", strings.Repeat("═", width-2))
+	fmt.Printf("║ TDMA Frame #%-4d              Duration: %-12v ║\n",
+		frameNum, frameDuration)
+	fmt.Printf("╠%s╣\n", strings.Repeat("═", width-2))
+
+	// Print column headers with fixed widths
+	fmt.Printf("║ Term │ SNR  │ Mod   │ Rate    │ Progress                    ║\n")
+	fmt.Printf("╟──────┼──────┼───────┼─────────┼────────────────────────────╢\n")
+
+	// Print each terminal's status with proper spacing
+	for _, status := range statuses {
+		// Calculate progress
+		var progress float64
+		if status.TotalData > 0 {
+			progress = 100.0 * float64(status.TotalData-status.RemainingData) /
+				float64(status.TotalData)
+		}
+
+		progressBar := createProgressBar(progress, 20)
+
+		fmt.Printf("║ %4d │ %4.1f │ %-5s │ %5.1fMb │ %-28s ║\n",
+			status.ID,
+			status.SNR,
+			status.ModScheme,
+			status.DataRate,
+			progressBar,
+		)
+	}
+
+	fmt.Printf("╚%s╝\n", strings.Repeat("═", width-2))
+
+	// Print detailed statistics with proper spacing
+	fmt.Printf("\nDetailed Statistics:\n")
+	fmt.Printf("══════════════════\n")
+
+	activeTransmissions := false
+	for _, status := range statuses {
+		if status.RemainingData > 0 {
+			activeTransmissions = true
+			fmt.Printf("Terminal %d:\n", status.ID)
+			fmt.Printf("  ├── Data Transferred: %d bytes\n",
+				status.DataThisFrame)
+			fmt.Printf("  ├── Remaining: %d bytes\n",
+				status.RemainingData)
+			fmt.Printf("  └── Slot Utilization: %.1f%%\n",
+				status.SlotUtilization)
+		}
+	}
+
+	if !activeTransmissions {
+		fmt.Println("\nAll transmissions complete!")
+	}
+}

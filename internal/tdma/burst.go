@@ -8,33 +8,6 @@ import (
 	"github.com/afroash/rf-simulator/internal/modulation"
 )
 
-// Constants for calculations
-const (
-	// Typical symbol rate for satellite communications (30 MHz bandwidth)
-	BaseSymbolRate = 25e6 // 25 MSymbols/second
-)
-
-type Burst struct {
-	Data          []byte
-	StartTime     time.Duration
-	Duration      time.Duration
-	CarrierID     int
-	Type          BurstType
-	Utilisation   float64 // Percentage of the time slot used by the burst
-	Modulation    modulation.ModulationScheme
-	SNR           float64
-	BER           float64
-	Datarate      float64
-	SymbolsPacked int
-}
-
-type TimeSlot struct {
-	StartTime   time.Duration
-	Duration    time.Duration
-	Burst       *Burst
-	IsGuardTime bool
-}
-
 // NewBurstWithSNR creates a burst with specific SNR value
 func NewBurstWithSNR(data []byte, carrierID int, burstType BurstType, snr float64) *Burst {
 	// Automatically select optimal modulation for given SNR

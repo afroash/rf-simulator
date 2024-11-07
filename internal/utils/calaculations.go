@@ -1,6 +1,12 @@
 package utils
 
-import "math"
+import (
+	"math"
+	"time"
+
+	"github.com/afroash/rf-simulator/internal/modulation"
+	"github.com/afroash/rf-simulator/internal/tdma"
+)
 
 type RFParameters struct {
 	FrequencyGHz    float64
@@ -28,4 +34,22 @@ func CalculateUtilisation(dataSize int) float64 {
 		return 100.0
 	}
 	return float64(dataSize) / float64(maxSize) * 100.0 // Calculate the percentage of the time slot used by the burst
+}
+
+func CalculateBurstSize(terminal *tdma.Terminal, slotDuration time.Duration, snr float64) int {
+	// Calculate maximum bytes that can be sent in this slot based on modulation
+	mod := modulation.GetOptimalModulation(snr)
+	scheme := modulation.GetModulationScheme(mod)
+
+	// Calculate theoretical throughput for the slot duration
+	bitsPerSymbol := scheme.BitsPerSymbol
+	symbolRate := float64(slotDuration.Nanoseconds()) * 25.0 // 25 symbols per nanosecond
+	maxBits := int64(symbolRate * bitsPerSymbol)
+	maxBytes := maxBits / 8
+
+	// Return either the maximum possible or remaining data, whichever is smaller
+	if maxBytes > terminal.RemainingData {
+		return int(terminal.RemainingData)
+	}
+	return int(maxBytes)
 }

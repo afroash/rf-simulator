@@ -7,39 +7,6 @@ import (
 	"time"
 )
 
-// TDMAFrame represents a complete TDMA frame.
-type TDMAFrame struct {
-	Duration    time.Duration
-	GuardTime   time.Duration
-	TimeSlots   []*TimeSlot
-	NumCarriers int
-}
-
-// v2 Additions
-// FrameConfig holds configuration for TDMA frame
-type FrameConfig struct {
-	FrameDuration time.Duration
-	GuardTime     time.Duration
-	NumCarriers   int
-	SlotDurations []time.Duration // Allow different slot durations
-}
-
-// Frame represents a sequence of TDMA frames
-type Frame struct {
-	Config      FrameConfig
-	TimeSlots   []*TimeSlot
-	FrameNumber int
-	SNRProfiles map[int]*SNRProfile // Per-carrier SNR profiles
-}
-
-// SNRProfile represents dynamic SNR characteristics for a carrier
-type SNRProfile struct {
-	BaselineSNR     float64
-	Variation       float64 // Maximum SNR variation
-	UpdateInterval  int     // Frames between SNR updates
-	LastUpdateFrame int
-}
-
 // NewFrame creates a new TDMA frame with variable slot durations
 func NewFrame(config FrameConfig) (*Frame, error) {
 	if len(config.SlotDurations) > 0 && len(config.SlotDurations) != config.NumCarriers {
