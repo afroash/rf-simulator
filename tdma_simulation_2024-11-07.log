@@ -12,3 +12,17 @@ Terminal 0: SNR=18.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
 Terminal 1: SNR=14.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
 Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
 Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 0
+Time: 23:55:01.740
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=90.0Mb, Sent=1000000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=52.5Mb, Sent=500000 bytes
+Terminal 2: SNR=12.0, Mod=QPSK, Rate=30.0Mb, Sent=750000 bytes
+Terminal 3: SNR=9.0, Mod=BPSK, Rate=11.3Mb, Sent=250000 bytes
+
+Frame 1
+Time: 23:55:01.941
+Terminal 0: SNR=18.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 1: SNR=14.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes

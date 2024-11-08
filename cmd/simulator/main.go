@@ -16,15 +16,15 @@ func main() {
 	terminals := []*tdma.Terminal{
 		{
 			ID:            0,
-			TotalSize:     1000000, // 1MB
-			RemainingData: 1000000,
+			TotalSize:     10000000, // 1MB
+			RemainingData: 10000000,
 			BaselineSNR:   18.0, // Good SNR - can use QAM64
 			Priority:      1,
 		},
 		{
 			ID:            1,
-			TotalSize:     500000, // 500KB
-			RemainingData: 500000,
+			TotalSize:     5000000, // 500KB
+			RemainingData: 5000000,
 			BaselineSNR:   14.0, // Moderate SNR - will use QPSK/8PSK
 			Priority:      2,
 		},

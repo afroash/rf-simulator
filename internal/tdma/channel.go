@@ -4,6 +4,8 @@ const (
 	BPSK ModulationType = iota
 	QPSK
 	PSK8
+	QAM16
+	QAM64
 )
 
 type ModulationType int

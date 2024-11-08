@@ -1,0 +1,98 @@
+
+Frame 0
+Time: 18:10:43.225
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=0.0Mb, Sent=1000000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=0.0Mb, Sent=500000 bytes
+Terminal 2: SNR=12.0, Mod=QPSK, Rate=0.0Mb, Sent=750000 bytes
+Terminal 3: SNR=9.0, Mod=BPSK, Rate=0.0Mb, Sent=250000 bytes
+
+Frame 1
+Time: 18:10:43.426
+Terminal 0: SNR=18.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 1: SNR=14.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 0
+Time: 18:11:30.957
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=0.0Mb, Sent=7500000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=0.0Mb, Sent=3750000 bytes
+Terminal 2: SNR=12.0, Mod=QPSK, Rate=0.0Mb, Sent=750000 bytes
+Terminal 3: SNR=9.0, Mod=BPSK, Rate=0.0Mb, Sent=250000 bytes
+
+Frame 1
+Time: 18:11:31.160
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=0.0Mb, Sent=2500000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=0.0Mb, Sent=1250000 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 2
+Time: 18:11:31.361
+Terminal 0: SNR=18.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 1: SNR=14.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 0
+Time: 18:37:34.396
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=0.0Mb, Sent=7500000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=0.0Mb, Sent=3750000 bytes
+Terminal 2: SNR=12.0, Mod=QPSK, Rate=0.0Mb, Sent=750000 bytes
+Terminal 3: SNR=9.0, Mod=BPSK, Rate=0.0Mb, Sent=250000 bytes
+
+Frame 1
+Time: 18:37:34.597
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=0.0Mb, Sent=2500000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=0.0Mb, Sent=1250000 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 2
+Time: 18:37:34.798
+Terminal 0: SNR=18.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 1: SNR=14.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 0
+Time: 18:43:17.743
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=0.0Mb, Sent=7500000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=0.0Mb, Sent=3750000 bytes
+Terminal 2: SNR=12.0, Mod=QPSK, Rate=0.0Mb, Sent=750000 bytes
+Terminal 3: SNR=9.0, Mod=BPSK, Rate=0.0Mb, Sent=250000 bytes
+
+Frame 1
+Time: 18:43:17.945
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=0.0Mb, Sent=2500000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=0.0Mb, Sent=1250000 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 2
+Time: 18:43:18.146
+Terminal 0: SNR=18.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 1: SNR=14.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 0
+Time: 18:59:52.448
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=96.8Mb, Sent=7500000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=56.2Mb, Sent=3750000 bytes
+Terminal 2: SNR=12.0, Mod=QPSK, Rate=39.4Mb, Sent=750000 bytes
+Terminal 3: SNR=9.0, Mod=BPSK, Rate=19.9Mb, Sent=250000 bytes
+
+Frame 1
+Time: 18:59:52.650
+Terminal 0: SNR=18.0, Mod=16-QAM, Rate=96.8Mb, Sent=2500000 bytes
+Terminal 1: SNR=14.0, Mod=8-PSK, Rate=56.2Mb, Sent=1250000 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+
+Frame 2
+Time: 18:59:52.851
+Terminal 0: SNR=18.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 1: SNR=14.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 2: SNR=12.0, Mod=-, Rate=0.0Mb, Sent=0 bytes
+Terminal 3: SNR=9.0, Mod=-, Rate=0.0Mb, Sent=0 bytes

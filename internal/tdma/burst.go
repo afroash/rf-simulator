@@ -85,8 +85,8 @@ func GetBurstsType(burstType BurstType) string {
 func calculateModulationBasedUtilization(dataSize int, mod modulation.ModulationScheme, duration time.Duration, snr float64) (float64, float64, int) {
 	durationSec := duration.Seconds()
 
-	// Calculate effective data rate considering SNR
-	effectiveDataRate := mod.CalculateEffectiveDataRate(BaseSymbolRate, snr)
+	// Calculate effective data rate considering SNR and symbol rate
+	effectiveDataRate := mod.CalculateEffectiveDataRate(snr, BaseSymbolRate)
 
 	// Maximum bits that could be transmitted in this time slot
 	maxBitsInSlot := int(effectiveDataRate * durationSec)
@@ -100,10 +100,10 @@ func calculateModulationBasedUtilization(dataSize int, mod modulation.Modulation
 		utilization = 100
 	}
 
-	// Actual achieved data rate
-	achievedDataRate := float64(actualBits) / durationSec
-	if achievedDataRate > effectiveDataRate {
-		achievedDataRate = effectiveDataRate
+	// Actual achieved data rate (in bits per second)
+	achievedDataRate := effectiveDataRate
+	if float64(actualBits)/durationSec < effectiveDataRate {
+		achievedDataRate = float64(actualBits) / durationSec
 	}
 
 	symbolsPacked := int(BaseSymbolRate * durationSec)
